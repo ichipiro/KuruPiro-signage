@@ -67,7 +67,7 @@ sleep 5
 
 echo "[kurupiro] URL: ${KIOSK_URL}"
 
-chromium-browser \
+chromium \
   --kiosk "${KIOSK_URL}" \
   --incognito \
   --noerrdialogs \
