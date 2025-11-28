@@ -41,7 +41,8 @@ apt-get install -y \
   git \
   nginx \
   xdotool \
-  curl
+  curl \
+  unclutter
 
 echo "[2/9] アプリディレクトリの確認"
 
@@ -79,6 +80,15 @@ SHUTDOWN_TIME="${KURUPIRO_SHUTDOWN_TIME:-21:57}"
 SHUTDOWN_HOUR="${SHUTDOWN_TIME%%:*}"
 SHUTDOWN_MIN="${SHUTDOWN_TIME##*:}"
 
+# unclutterの自動起動設定
+AUTOSTART_FILE="/home/${PI_USER}/.config/lxsession/LXDE-pi/autostart"
+mkdir -p "$(dirname "$AUTOSTART_FILE")"
+if ! grep -q "^@unclutter" "$AUTOSTART_FILE" 2>/dev/null; then
+  echo "@unclutter" >> "$AUTOSTART_FILE"
+  chown "${PI_USER}:${PI_USER}" "$AUTOSTART_FILE"
+  echo "LXDE-piのautostartに@unclutterを追記しました。"
+fi
+
 echo "[4/9] scripts ディレクトリの権限設定"
 
 chmod +x scripts/*.sh
@@ -101,6 +111,8 @@ server {
         proxy_pass ${UPSTREAM_URL};
         proxy_read_timeout 5s;
         proxy_connect_timeout 3s;
+        proxy_ssl_verify off;
+        proxy_ssl_server_name on;
         error_page 500 502 503 504 /offline.html;
     }
 
