@@ -98,6 +98,9 @@ echo "[5/9] nginx 設定"
 
 NGINX_CONF="/etc/nginx/sites-available/kurupiro"
 
+# URLからホスト名を抽出
+UPSTREAM_HOST=$(echo "${UPSTREAM_URL}" | sed -E 's|https?://([^/]+).*|\1|')
+
 cat > "${NGINX_CONF}" <<EOF
 server {
     listen 80 default_server;
@@ -113,6 +116,7 @@ server {
         proxy_connect_timeout 3s;
         proxy_ssl_verify off;
         proxy_ssl_server_name on;
+        proxy_set_header Host ${UPSTREAM_HOST};
         error_page 500 502 503 504 /offline.html;
     }
 

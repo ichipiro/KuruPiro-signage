@@ -72,6 +72,8 @@ chromium \
   --incognito \
   --noerrdialogs \
   --disable-session-crashed-bubble \
-  --autoplay-policy=no-user-gesture-required
+  --autoplay-policy=no-user-gesture-required \
+  --disable-translate \
+  --disable-features=Translate
 
 echo "===== くるぴろ起動スクリプト終了 ====="
