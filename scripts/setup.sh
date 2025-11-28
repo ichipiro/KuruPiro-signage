@@ -90,6 +90,29 @@ if ! grep -q "^@unclutter" "$AUTOSTART_FILE" 2>/dev/null; then
   echo "LXDE-piのautostartに@unclutterを追記しました。"
 fi
 
+# デスクトップを黒背景にしてアイコン非表示
+DESKTOP_CONF="/home/${PI_USER}/.config/pcmanfm/LXDE-pi/desktop-items-0.conf"
+mkdir -p "$(dirname "$DESKTOP_CONF")"
+cat > "$DESKTOP_CONF" <<EOF
+[*]
+desktop_bg=#000000
+desktop_fg=#ffffff
+desktop_shadow=#000000
+wallpaper_mode=color
+show_documents=0
+show_trash=0
+show_mounts=0
+EOF
+chown -R "${PI_USER}:${PI_USER}" "/home/${PI_USER}/.config/pcmanfm"
+echo "デスクトップを黒背景に設定しました。"
+
+# LXPanelを非表示（自動起動から削除）
+PANEL_AUTOSTART="/etc/xdg/lxsession/LXDE-pi/autostart"
+if [ -f "$PANEL_AUTOSTART" ]; then
+  sed -i 's/^@lxpanel/#@lxpanel/' "$PANEL_AUTOSTART" 2>/dev/null || true
+  echo "LXPanelを自動起動から無効化しました。"
+fi
+
 echo "[4/9] scripts ディレクトリの権限設定"
 
 chmod +x scripts/*.sh
