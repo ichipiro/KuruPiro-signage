@@ -81,6 +81,20 @@ SHUTDOWN_HOUR="${SHUTDOWN_TIME%%:*}"
 SHUTDOWN_MIN="${SHUTDOWN_TIME##*:}"
 RELOAD_INTERVAL="${KURUPIRO_RELOAD_INTERVAL:-2h}"
 
+# X11セッション（rpd-x）に強制設定（Waylandではunclutterが動作しないため）
+LIGHTDM_CONF="/etc/lightdm/lightdm.conf"
+if [ -f "$LIGHTDM_CONF" ]; then
+  sed -i 's/^user-session=.*/user-session=rpd-x/' "$LIGHTDM_CONF"
+  sed -i 's/^autologin-session=.*/autologin-session=rpd-x/' "$LIGHTDM_CONF"
+  echo "X11セッション(rpd-x)に設定しました。"
+fi
+
+# Waylandパネル(wf-panel-pi)を無効化（Wayland使用時のフォールバック）
+LABWC_AUTOSTART="/etc/xdg/labwc/autostart"
+if [ -f "$LABWC_AUTOSTART" ]; then
+  sed -i 's|^/usr/bin/lwrespawn /usr/bin/wf-panel-pi|#/usr/bin/lwrespawn /usr/bin/wf-panel-pi|' "$LABWC_AUTOSTART" 2>/dev/null || true
+fi
+
 # unclutterの自動起動設定（システム全体のautostartに追加）
 SYSTEM_AUTOSTART="/etc/xdg/lxsession/rpd-x/autostart"
 if [ -f "$SYSTEM_AUTOSTART" ]; then
