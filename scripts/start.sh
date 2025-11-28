@@ -1,0 +1,77 @@
+#!/bin/bash
+set -euo pipefail
+
+# ==============================================================================
+# start.sh - 毎回起動時に実行するスクリプト
+# ==============================================================================
+# このスクリプトは Raspberry Pi の起動時に毎回実行され、以下を行います:
+#   1. git pull で最新のコードを取得
+#   2. nginx の起動確認
+#   3. Chromium キオスクモードの起動
+# ==============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# .env 読み込み
+if [ -f "${BASE_DIR}/.env" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . "${BASE_DIR}/.env"
+  set +a
+fi
+
+# リポジトリURL
+REPO_URL="https://github.com/ichipiro/KuruPiro-signage.git"
+
+# 設定値（デフォルト）
+KIOSK_URL="${KURUPIRO_KIOSK_URL:-http://localhost/}"
+
+echo "===== くるぴろ起動スクリプト開始 ====="
+
+# ------------------------------------------------------------------------------
+# 1. git pull（最新コード取得）
+# ------------------------------------------------------------------------------
+echo "[1/3] git pull 実行中..."
+cd "${BASE_DIR}" || exit 1
+
+# リモートが未設定なら設定
+if ! git remote get-url origin >/dev/null 2>&1; then
+  git remote add origin "${REPO_URL}"
+fi
+
+if git pull --rebase; then
+  echo "[kurupiro] git pull 成功"
+else
+  echo "[kurupiro] git pull に失敗しました。前回バージョンのまま続行します。" >&2
+fi
+
+# ------------------------------------------------------------------------------
+# 2. nginx 起動確認
+# ------------------------------------------------------------------------------
+echo "[2/3] nginx 起動確認..."
+if systemctl is-active --quiet nginx; then
+  echo "[kurupiro] nginx は既に起動しています"
+else
+  echo "[kurupiro] nginx を起動します..."
+  sudo systemctl start nginx
+fi
+
+# ------------------------------------------------------------------------------
+# 3. Chromium キオスク起動
+# ------------------------------------------------------------------------------
+echo "[3/3] Chromium キオスク起動..."
+
+# X が立ち上がるまで少し待つ（必要に応じて調整）
+sleep 5
+
+echo "[kurupiro] URL: ${KIOSK_URL}"
+
+chromium-browser \
+  --kiosk "${KIOSK_URL}" \
+  --incognito \
+  --noerrdialogs \
+  --disable-session-crashed-bubble \
+  --autoplay-policy=no-user-gesture-required
+
+echo "===== くるぴろ起動スクリプト終了 ====="
