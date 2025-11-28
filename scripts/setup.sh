@@ -79,37 +79,10 @@ SHUTDOWN_TIME="${KURUPIRO_SHUTDOWN_TIME:-21:57}"
 SHUTDOWN_HOUR="${SHUTDOWN_TIME%%:*}"
 SHUTDOWN_MIN="${SHUTDOWN_TIME##*:}"
 
-echo "[4/9] scripts ディレクトリとスクリプト作成"
-
-mkdir -p scripts
-chown -R "${PI_USER}:${PI_USER}" scripts
-
-# 共通設定
-cat > scripts/common.sh <<'EOF'
-#!/bin/bash
-set -euo pipefail
-
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
-if [ -f "${BASE_DIR}/.env" ]; then
-  set -a
-  # shellcheck disable=SC1091
-  . "${BASE_DIR}/.env"
-  set +a
-fi
-EOF
-
-# reload.sh（F5 リロード）
-cat > scripts/reload.sh <<'EOF'
-#!/bin/bash
-set -euo pipefail
-
-# ディスプレイ番号は環境に応じて調整（基本 :0 でOK）
-DISPLAY=:0 xdotool key F5 || echo "[kurupiro] xdotool F5 失敗" >&2
-EOF
+echo "[4/9] scripts ディレクトリの権限設定"
 
 chmod +x scripts/*.sh
-chown "${PI_USER}:${PI_USER}" scripts/*.sh
+chown -R "${PI_USER}:${PI_USER}" scripts
 
 echo "[5/9] nginx 設定"
 

@@ -60,7 +60,7 @@ cd /opt/kurupiro
 
 ### 4️⃣ セットアップスクリプトの実行
 ```bash
-sudo ./scripts/setup.sh
+sudo bash ./scripts/setup.sh
 ```
 
 ### 5️⃣ .env の編集
