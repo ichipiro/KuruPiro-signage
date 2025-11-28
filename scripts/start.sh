@@ -30,9 +30,9 @@ KIOSK_URL="${KURUPIRO_KIOSK_URL:-http://localhost/}"
 echo "===== くるぴろ起動スクリプト開始 ====="
 
 # ------------------------------------------------------------------------------
-# 1. git pull（最新コード取得）
+# 1. git fetch & reset（最新コード取得、ローカル変更は破棄）
 # ------------------------------------------------------------------------------
-echo "[1/3] git pull 実行中..."
+echo "[1/3] git fetch & reset 実行中..."
 cd "${BASE_DIR}" || exit 1
 
 # リモートが未設定なら設定
@@ -40,10 +40,11 @@ if ! git remote get-url origin >/dev/null 2>&1; then
   git remote add origin "${REPO_URL}"
 fi
 
-if git pull --rebase; then
-  echo "[kurupiro] git pull 成功"
+# ローカル変更を破棄してリモートに強制同期
+if git fetch origin && git reset --hard origin/main; then
+  echo "[kurupiro] git fetch & reset 成功"
 else
-  echo "[kurupiro] git pull に失敗しました。前回バージョンのまま続行します。" >&2
+  echo "[kurupiro] git fetch に失敗しました。前回バージョンのまま続行します。" >&2
 fi
 
 # ------------------------------------------------------------------------------
