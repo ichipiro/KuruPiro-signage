@@ -9,7 +9,7 @@ set -euo pipefail
 # ==============================================================================
 
 # ==== 設定値（必要に応じて修正） ====
-PI_USER="pi"
+PI_USER="ie"
 APP_DIR="/opt/kurupiro"
 INSTALL_FLAG="${APP_DIR}/.installed"
 
@@ -58,25 +58,17 @@ fi
 cd "${APP_DIR}"
 chown -R "${PI_USER}:${PI_USER}" "${APP_DIR}"
 
-echo "[3/9] .env の作成（なければ作成）"
+echo "[3/11] .env の作成（なければ作成）"
 if [ ! -f .env ]; then
-  # 既存 .env.sample があればそれをコピー
   if [ -f .env.sample ]; then
     cp .env.sample .env
+    chown "${PI_USER}:${PI_USER}" .env
+    echo ".env を作成しました。必要に応じて後で編集してください。"
   else
-    cat > .env <<'EOF'
-# 表示する上流URL（例）
-KURUPIRO_UPSTREAM_URL="https://example.com/kurupiro"
-
-# ChromiumでアクセスするURL（通常は localhost）
-KURUPIRO_KIOSK_URL="http://localhost/"
-
-# 自動シャットダウン時刻（HH:MM形式）
-KURUPIRO_SHUTDOWN_TIME="21:57"
-EOF
+    echo "エラー: .env.sample が存在しません。" >&2
+    echo "リポジトリが正しく clone されているか確認してください。" >&2
+    exit 1
   fi
-  chown "${PI_USER}:${PI_USER}" .env
-  echo ".env を作成しました。必要に応じて後で編集してください。"
 fi
 
 # .env 読み込み（nginx設定に使う）
@@ -88,7 +80,7 @@ SHUTDOWN_TIME="${KURUPIRO_SHUTDOWN_TIME:-21:57}"
 SHUTDOWN_HOUR="${SHUTDOWN_TIME%%:*}"
 SHUTDOWN_MIN="${SHUTDOWN_TIME##*:}"
 
-echo "[4/11] scripts ディレクトリとスクリプト作成"
+echo "[4/9] scripts ディレクトリとスクリプト作成"
 
 mkdir -p scripts
 chown -R "${PI_USER}:${PI_USER}" scripts
@@ -120,7 +112,7 @@ EOF
 chmod +x scripts/*.sh
 chown "${PI_USER}:${PI_USER}" scripts/*.sh
 
-echo "[5/11] nginx 設定"
+echo "[5/9] nginx 設定"
 
 NGINX_CONF="/etc/nginx/sites-available/kurupiro"
 
@@ -147,39 +139,8 @@ server {
 EOF
 
 mkdir -p "${APP_DIR}/www"
+cp -r "${APP_DIR}/www/"* "${APP_DIR}/www/" 2>/dev/null || true
 chown -R "${PI_USER}:${PI_USER}" "${APP_DIR}/www"
-
-# offline.html がなければ簡易版を作成
-if [ ! -f "${APP_DIR}/www/offline.html" ]; then
-  cat > "${APP_DIR}/www/offline.html" <<'EOF'
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>現在バス情報を取得できません</title>
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-size: 3rem;
-      font-family: sans-serif;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  現在バス時刻情報を取得できません。<br>
-  しばらくお待ちください。
-</body>
-</html>
-EOF
-  chown "${PI_USER}:${PI_USER}" "${APP_DIR}/www/offline.html"
-fi
 
 ln -sf "${NGINX_CONF}" /etc/nginx/sites-enabled/kurupiro
 # デフォルトサイトは不要なら無効化
@@ -189,7 +150,7 @@ fi
 
 systemctl restart nginx
 
-echo "[6/11] systemd ユニット作成"
+echo "[6/9] systemd ユニット作成"
 
 # kurupiro-start.service（起動時に start.sh を実行）
 cat > /etc/systemd/system/kurupiro-start.service <<EOF
@@ -235,14 +196,14 @@ Unit=kurupiro-reload.service
 WantedBy=timers.target
 EOF
 
-echo "[7/11] 自動シャットダウン設定 (${SHUTDOWN_TIME})"
+echo "[7/9] 自動シャットダウン設定 (${SHUTDOWN_TIME})"
 
 cat > /etc/cron.d/kurupiro-shutdown <<EOF
 # 毎日 ${SHUTDOWN_TIME} にシャットダウン
 ${SHUTDOWN_MIN} ${SHUTDOWN_HOUR} * * * root /sbin/shutdown -h now
 EOF
 
-echo "[8/11] USB キーボード・マウス無効化 (usbhid blacklist)"
+echo "[8/9] USB キーボード・マウス無効化 (usbhid blacklist)"
 
 cat > /etc/modprobe.d/blacklist-usbhid.conf <<'EOF'
 # くるぴろサイネージ用: USB HID デバイスを無効化
@@ -251,17 +212,7 @@ EOF
 
 echo "※ この設定を有効にするには再起動が必要です。"
 
-echo "[9/11] Tailscale のインストール"
-
-curl -fsSL https://tailscale.com/install.sh | sh
-
-echo "※ Tailscale を有効にするには 'sudo tailscale up' を実行してください。"
-
-echo "[10/11] Mackerel エージェントのインストール"
-
-wget -q -O - https://mackerel.io/file/script/setup-all-apt-v2.sh | MACKEREL_APIKEY='6nMnvWkkyqk5tGj7WKNVVqctAHfcEhpZHbPhdve7FYBs' sh
-
-echo "[11/11] systemd 有効化"
+echo "[9/9] systemd 有効化"
 
 systemctl daemon-reload
 systemctl enable kurupiro-start.service
@@ -271,5 +222,5 @@ touch "${INSTALL_FLAG}"
 chown "${PI_USER}:${PI_USER}" "${INSTALL_FLAG}"
 
 echo "===== セットアップ完了 ====="
-echo "再起動後、8:00 電源投入で自動起動し、21:57 にシャットダウンします。"
+echo "再起動後、自動起動し、${SHUTDOWN_TIME} にシャットダウンします。"
 echo "USB HID 無効化の反映にも再起動が必要です。"
