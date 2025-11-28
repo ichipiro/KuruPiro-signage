@@ -71,6 +71,9 @@ echo "[3/3] Chromium キオスク起動..."
 # X が立ち上がるまで少し待つ（必要に応じて調整）
 sleep 5
 
+# 背景を黒に設定
+xsetroot -solid black 2>/dev/null || true
+
 echo "[kurupiro] URL: ${KIOSK_URL}"
 
 chromium \
