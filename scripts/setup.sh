@@ -40,7 +40,6 @@ apt-get update
 apt-get install -y \
   git \
   nginx \
-  chromium-browser \
   xdotool \
   curl
 
