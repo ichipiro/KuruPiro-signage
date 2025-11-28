@@ -79,6 +79,7 @@ KIOSK_URL="${KURUPIRO_KIOSK_URL:-http://localhost/}"
 SHUTDOWN_TIME="${KURUPIRO_SHUTDOWN_TIME:-21:57}"
 SHUTDOWN_HOUR="${SHUTDOWN_TIME%%:*}"
 SHUTDOWN_MIN="${SHUTDOWN_TIME##*:}"
+RELOAD_INTERVAL="${KURUPIRO_RELOAD_INTERVAL:-2h}"
 
 # unclutterの自動起動設定
 AUTOSTART_FILE="/home/${PI_USER}/.config/lxsession/LXDE-pi/autostart"
@@ -117,6 +118,11 @@ server {
         proxy_ssl_verify off;
         proxy_ssl_server_name on;
         proxy_set_header Host ${UPSTREAM_HOST};
+
+        # CORSヘッダー（crossorigin属性のあるスクリプト/CSS用）
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+
         error_page 500 502 503 504 /offline.html;
     }
 
@@ -171,13 +177,13 @@ User=${PI_USER}
 Group=${PI_USER}
 EOF
 
-cat > /etc/systemd/system/kurupiro-reload.timer <<'EOF'
+cat > /etc/systemd/system/kurupiro-reload.timer <<EOF
 [Unit]
 Description=kurupiro browser soft reload timer
 
 [Timer]
-OnBootSec=30min
-OnUnitActiveSec=2h
+OnBootSec=${RELOAD_INTERVAL}
+OnUnitActiveSec=${RELOAD_INTERVAL}
 Unit=kurupiro-reload.service
 
 [Install]
