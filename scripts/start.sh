@@ -35,6 +35,9 @@ echo "===== くるぴろ起動スクリプト開始 ====="
 echo "[1/3] git fetch & reset 実行中..."
 cd "${BASE_DIR}" || exit 1
 
+# ネットワークエラーでも継続するため set +e
+set +e
+
 # リモートが未設定なら設定
 if ! git remote get-url origin >/dev/null 2>&1; then
   git remote add origin "${REPO_URL}"
@@ -46,6 +49,8 @@ if git fetch origin && git reset --hard origin/main; then
 else
   echo "[kurupiro] git fetch に失敗しました。前回バージョンのまま続行します。" >&2
 fi
+
+set -e
 
 # ------------------------------------------------------------------------------
 # 2. nginx 起動確認
