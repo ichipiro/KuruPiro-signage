@@ -2,10 +2,19 @@
 set -euo pipefail
 
 # ==============================================================================
-# reload.sh - Chromium をリロード（F5キー送信）
+# reload.sh - Chromium をリロード（F5キー送信）+ スクリーンセーバー無効化再適用
 # ==============================================================================
 # 2時間ごとに systemd timer から呼び出されます。
 # ==============================================================================
 
-# ディスプレイ番号は環境に応じて調整（基本 :0 でOK）
-DISPLAY=:0 xdotool key F5 || echo "[kurupiro] xdotool F5 失敗" >&2
+export DISPLAY=:0
+
+# スクリーンセーバー・DPMS無効化を再適用（念のため）
+xset s off 2>/dev/null || true
+xset s noblank 2>/dev/null || true
+xset s 0 0 2>/dev/null || true
+xset -dpms 2>/dev/null || true
+xset dpms 0 0 0 2>/dev/null || true
+
+# Chromium をリロード
+xdotool key F5 || echo "[kurupiro] xdotool F5 失敗" >&2

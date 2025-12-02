@@ -282,13 +282,12 @@ for SESSION in rpd-x LXDE-pi; do
   AUTOSTART_FILE="/etc/xdg/lxsession/${SESSION}/autostart"
   if [ -f "$AUTOSTART_FILE" ]; then
     # 既存のxset設定を削除
-    sed -i '/^@xset s /d' "$AUTOSTART_FILE" 2>/dev/null || true
-    sed -i '/^@xset -dpms/d' "$AUTOSTART_FILE" 2>/dev/null || true
-    sed -i '/^@xset dpms 0 0 0/d' "$AUTOSTART_FILE" 2>/dev/null || true
+    sed -i '/^@xset/d' "$AUTOSTART_FILE" 2>/dev/null || true
     # スクリーンセーバー無効化とDPMS無効化を追加
     echo "@xset s off" >> "$AUTOSTART_FILE"
     echo "@xset s noblank" >> "$AUTOSTART_FILE"
     echo "@xset -dpms" >> "$AUTOSTART_FILE"
+    echo "@xset dpms 0 0 0" >> "$AUTOSTART_FILE"
     echo "${SESSION}のスクリーンセーバー・DPMSを無効化しました。"
   fi
 done
@@ -300,6 +299,11 @@ if [ -f "$LIGHTDM_CONF" ]; then
     echo "LightDMにスクリーンブランク無効化を設定しました。"
   fi
 fi
+
+# systemd のスリープ・サスペンド・ハイバネートを完全無効化
+echo "systemdのスリープ機能を無効化しています..."
+systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target 2>/dev/null || true
+echo "systemdのスリープ機能を無効化しました。"
 
 echo "[10/11] コンソールブランク無効化 (cmdline.txt)"
 
