@@ -148,8 +148,15 @@ echo "[5/9] nginx 設定"
 
 NGINX_CONF="/etc/nginx/sites-available/kurupiro"
 
-# URLからホスト名を抽出
+# URLからホスト名とパスを抽出
 UPSTREAM_HOST=$(echo "${UPSTREAM_URL}" | sed -E 's|https?://([^/]+).*|\1|')
+UPSTREAM_BASE=$(echo "${UPSTREAM_URL}" | sed -E 's|(https?://[^/]+).*|\1|')
+UPSTREAM_PATH=$(echo "${UPSTREAM_URL}" | sed -E 's|https?://[^/]+(.*)|\1|')
+
+# パスの末尾にスラッシュを追加（なければ）
+if [ -n "${UPSTREAM_PATH}" ] && [ "${UPSTREAM_PATH: -1}" != "/" ]; then
+  UPSTREAM_PATH="${UPSTREAM_PATH}/"
+fi
 
 cat > "${NGINX_CONF}" <<EOF
 server {
@@ -159,9 +166,22 @@ server {
     root ${APP_DIR}/www;
     index offline.html;
 
+    # アセットへのプロキシ（上流のルート直下）
+    location /assets/ {
+        proxy_pass ${UPSTREAM_BASE}/assets/;
+        proxy_read_timeout 5s;
+        proxy_connect_timeout 3s;
+        proxy_ssl_verify off;
+        proxy_ssl_server_name on;
+        proxy_set_header Host ${UPSTREAM_HOST};
+
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+    }
+
     # 上流サイトへの proxy
     location / {
-        proxy_pass ${UPSTREAM_URL};
+        proxy_pass ${UPSTREAM_BASE}${UPSTREAM_PATH};
         proxy_read_timeout 5s;
         proxy_connect_timeout 3s;
         proxy_ssl_verify off;
