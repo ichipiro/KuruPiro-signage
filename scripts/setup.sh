@@ -42,7 +42,8 @@ apt-get install -y \
   nginx \
   xdotool \
   curl \
-  unclutter
+  unclutter \
+  fonts-noto-cjk
 
 echo "[2/9] アプリディレクトリの確認"
 
