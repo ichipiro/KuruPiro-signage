@@ -71,6 +71,12 @@ echo "[3/3] Chromium キオスク起動..."
 # X が立ち上がるまで少し待つ（必要に応じて調整）
 sleep 5
 
+# スクリーンセーバー・画面ブランク・DPMS無効化（常時表示）
+xset s off 2>/dev/null || true
+xset s noblank 2>/dev/null || true
+xset -dpms 2>/dev/null || true
+echo "[kurupiro] スクリーンセーバー・DPMSを無効化しました"
+
 # 背景を黒に設定
 xsetroot -solid black 2>/dev/null || true
 

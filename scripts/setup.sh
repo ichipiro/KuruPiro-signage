@@ -266,7 +266,7 @@ cat > /etc/cron.d/kurupiro-shutdown <<EOF
 ${SHUTDOWN_MIN} ${SHUTDOWN_HOUR} * * * root /sbin/shutdown -h now
 EOF
 
-echo "[8/9] USB キーボード・マウス無効化 (usbhid blacklist)"
+echo "[8/11] USB キーボード・マウス無効化 (usbhid blacklist)"
 
 cat > /etc/modprobe.d/blacklist-usbhid.conf <<'EOF'
 # くるぴろサイネージ用: USB HID デバイスを無効化
@@ -275,7 +275,51 @@ EOF
 
 echo "※ この設定を有効にするには再起動が必要です。"
 
-echo "[9/9] systemd 有効化"
+echo "[9/11] スクリーンセーバー・画面ブランク無効化"
+
+# X11用: xset設定をautostartに追加
+for SESSION in rpd-x LXDE-pi; do
+  AUTOSTART_FILE="/etc/xdg/lxsession/${SESSION}/autostart"
+  if [ -f "$AUTOSTART_FILE" ]; then
+    # 既存のxset設定を削除
+    sed -i '/^@xset s /d' "$AUTOSTART_FILE" 2>/dev/null || true
+    sed -i '/^@xset -dpms/d' "$AUTOSTART_FILE" 2>/dev/null || true
+    sed -i '/^@xset dpms 0 0 0/d' "$AUTOSTART_FILE" 2>/dev/null || true
+    # スクリーンセーバー無効化とDPMS無効化を追加
+    echo "@xset s off" >> "$AUTOSTART_FILE"
+    echo "@xset s noblank" >> "$AUTOSTART_FILE"
+    echo "@xset -dpms" >> "$AUTOSTART_FILE"
+    echo "${SESSION}のスクリーンセーバー・DPMSを無効化しました。"
+  fi
+done
+
+# lightdm.confにブランク無効化設定を追加
+if [ -f "$LIGHTDM_CONF" ]; then
+  if ! grep -q "^xserver-command=" "$LIGHTDM_CONF"; then
+    sed -i '/^\[Seat:\*\]/a xserver-command=X -s 0 -dpms' "$LIGHTDM_CONF"
+    echo "LightDMにスクリーンブランク無効化を設定しました。"
+  fi
+fi
+
+echo "[10/11] コンソールブランク無効化 (cmdline.txt)"
+
+# Raspberry Pi OS の /boot/firmware/cmdline.txt または /boot/cmdline.txt
+CMDLINE_FILE=""
+if [ -f "/boot/firmware/cmdline.txt" ]; then
+  CMDLINE_FILE="/boot/firmware/cmdline.txt"
+elif [ -f "/boot/cmdline.txt" ]; then
+  CMDLINE_FILE="/boot/cmdline.txt"
+fi
+
+if [ -n "$CMDLINE_FILE" ]; then
+  # consoleblankとvt.global_cursor_defaultが未設定なら追加
+  if ! grep -q "consoleblank=0" "$CMDLINE_FILE"; then
+    sed -i 's/$/ consoleblank=0/' "$CMDLINE_FILE"
+    echo "コンソールブランク無効化を追加しました。"
+  fi
+fi
+
+echo "[11/11] systemd 有効化"
 
 systemctl daemon-reload
 systemctl enable kurupiro-start.service
