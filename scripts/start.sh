@@ -73,11 +73,12 @@ sleep 5
 
 # DISPLAY環境変数を設定（X11に接続するために必要）
 export DISPLAY=:0
+export XAUTHORITY=/home/ie/.Xauthority
 
 # X11が利用可能になるまで待機
 MAX_WAIT=30
 WAITED=0
-while ! xdpyinfo >/dev/null 2>&1; do
+while ! xset q >/dev/null 2>&1; do
   if [ $WAITED -ge $MAX_WAIT ]; then
     echo "[kurupiro] エラー: X11サーバーに接続できません（${MAX_WAIT}秒待機）" >&2
     exit 1
