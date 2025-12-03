@@ -335,4 +335,6 @@ chown "${PI_USER}:${PI_USER}" "${INSTALL_FLAG}"
 
 echo "===== セットアップ完了 ====="
 echo "再起動後、自動起動し、${SHUTDOWN_TIME} にシャットダウンします。"
-echo "USB HID 無効化の反映にも再起動が必要です。"
+echo "5秒後に自動的に再起動します..."
+sleep 5
+sudo reboot now

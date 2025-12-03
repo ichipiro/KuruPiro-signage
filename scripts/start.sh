@@ -71,6 +71,23 @@ echo "[3/3] Chromium キオスク起動..."
 # X が立ち上がるまで少し待つ（必要に応じて調整）
 sleep 5
 
+# DISPLAY環境変数を設定（X11に接続するために必要）
+export DISPLAY=:0
+
+# X11が利用可能になるまで待機
+MAX_WAIT=30
+WAITED=0
+while ! xdpyinfo >/dev/null 2>&1; do
+  if [ $WAITED -ge $MAX_WAIT ]; then
+    echo "[kurupiro] エラー: X11サーバーに接続できません（${MAX_WAIT}秒待機）" >&2
+    exit 1
+  fi
+  echo "[kurupiro] X11サーバーを待機中... (${WAITED}/${MAX_WAIT}秒)"
+  sleep 1
+  WAITED=$((WAITED + 1))
+done
+echo "[kurupiro] X11サーバーに接続しました"
+
 # スクリーンセーバー・画面ブランク・DPMS無効化（常時表示）
 xset s off 2>/dev/null || true
 xset s noblank 2>/dev/null || true
