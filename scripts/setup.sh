@@ -324,11 +324,21 @@ if [ -n "$CMDLINE_FILE" ]; then
   fi
 fi
 
-echo "[11/11] systemd 有効化"
+echo "[11/12] systemd 有効化"
 
 systemctl daemon-reload
 systemctl enable kurupiro-start.service
 systemctl enable kurupiro-reload.timer
+
+echo "[12/12] バージョン情報埋め込み"
+
+# Gitコミットハッシュをoffline.htmlに埋め込み
+COMMIT_HASH=$(git -C "${APP_DIR}" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+OFFLINE_HTML="${APP_DIR}/www/offline.html"
+if [ -f "$OFFLINE_HTML" ]; then
+  sed -i "s/<!--GIT_COMMIT_HASH-->/${COMMIT_HASH}/" "$OFFLINE_HTML"
+  echo "コミットハッシュ ${COMMIT_HASH} を埋め込みました。"
+fi
 
 touch "${INSTALL_FLAG}"
 chown "${PI_USER}:${PI_USER}" "${INSTALL_FLAG}"
