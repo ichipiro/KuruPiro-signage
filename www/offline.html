@@ -2,24 +2,111 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>現在バス情報を取得できません</title>
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-size: 3rem;
-      font-family: sans-serif;
-      text-align: center;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./offline.css">
+  <title>くるぴろ - オフライン</title>
 </head>
 <body>
-  現在バス時刻情報を取得できません。<br>
-  しばらくお待ちください。
+  <!-- 左サイドバー -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="time-box">
+        <span class="time-label">現在時刻</span>
+        <span class="time-value" id="current-time">--:--</span>
+      </div>
+    </div>
+    <div class="logo-container">
+      <img src="./logo.png" alt="くるぴろ" class="logo">
+    </div>
+    <div class="ad-container">
+      <div class="ad-box">
+        <img src="./ad-01.png" alt="広告" class="ad-image">
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <img src="./for-smartphone.png" alt="スマホ版はこちら" class="for-smartphone">
+      <img src="./qr.png" alt="QRコード" class="qr-code">
+    </div>
+  </div>
+
+  <!-- メインエリア：診断パネル -->
+  <div class="main-area">
+    <div class="diagnostic-panel">
+      <p class="panel-description">現在ネットワーク接続に問題があり、サーバーにアクセスできません</p>
+      <h1 class="panel-title">
+        <span class="panel-title-icon">⚠️</span>
+        ネットワーク診断
+      </h1>
+
+      <div class="status-list">
+        <!-- ネットワーク状態 -->
+        <div class="status-item">
+          <span class="status-label">📶 ネットワーク接続</span>
+          <span class="status-value" id="status-network">
+            <span class="status-icon spinning">⟳</span>
+            <span class="status-checking">確認中...</span>
+          </span>
+        </div>
+
+        <!-- DNS (1.1.1.1) -->
+        <div class="status-item">
+          <span class="status-label">🌐 DNS (1.1.1.1)</span>
+          <span class="status-value" id="status-dns-cloudflare">
+            <span class="status-icon spinning">⟳</span>
+            <span class="status-checking">確認中...</span>
+          </span>
+        </div>
+
+        <!-- DNS (8.8.8.8) -->
+        <div class="status-item">
+          <span class="status-label">🌐 DNS (8.8.8.8)</span>
+          <span class="status-value" id="status-dns-google">
+            <span class="status-icon spinning">⟳</span>
+            <span class="status-checking">確認中...</span>
+          </span>
+        </div>
+
+        <!-- くるぴろサーバー -->
+        <div class="status-item">
+          <span class="status-label">🚌 くるぴろサーバー</span>
+          <span class="status-value" id="status-server">
+            <span class="status-icon spinning">⟳</span>
+            <span class="status-checking">確認中...</span>
+          </span>
+        </div>
+
+        <!-- APIサーバー -->
+        <div class="status-item">
+          <span class="status-label">📡 APIサーバー</span>
+          <span class="status-value" id="status-api">
+            <span class="status-icon spinning">⟳</span>
+            <span class="status-checking">確認中...</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- リトライ情報 -->
+      <div class="retry-section">
+        <div class="retry-info" id="retry-info">次の再チェックまで: 60秒</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- 連絡先・バージョン -->
+      <div class="footer-info">
+        <div class="contact-info">
+          <span class="contact-link">X: @hcu_tech</span> にDM
+          <br><span class="contact-link">contact@ichipiro.net</span>にメールをお願いします。
+        </div>
+        <div class="version-info" id="version-info">Version: <!--GIT_COMMIT_HASH--></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./offline.js"></script>
 </body>
 </html>

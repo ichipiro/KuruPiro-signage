@@ -1,0 +1,261 @@
+/* offline.css - オフラインページ用スタイル */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Inter', 'Helvetica Neue', 'Arial', 'Hiragino Kaku Gothic ProN', 'Meiryo', "Noto Sans JP", sans-serif;
+}
+
+body {
+  background: #005394;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  gap: 0.625vw;
+}
+
+/* 左サイドバー */
+.sidebar {
+  flex: 1;
+  min-width: 0;
+  background: #FFD06C;
+  height: 100%;
+  padding: 1.5vw;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2vw;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.time-box {
+  background: #1E3A5F;
+  padding: 0.5vw 1vw;
+  display: flex;
+  align-items: baseline;
+  gap: 0.8vw;
+}
+
+.time-label {
+  color: white;
+  font-size: 1.1vw;
+  font-weight: 500;
+}
+
+.time-value {
+  color: white;
+  font-size: 2.8vw;
+  font-weight: bold;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+}
+
+.logo {
+  width: 18vw;
+}
+
+/* 広告エリア */
+.ad-container {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ad-box {
+  background: white;
+  border-radius: 1.2vw;
+  overflow: hidden;
+  padding: 1vw;
+  border: 0.4vw solid #005394;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* フッター */
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1vw;
+}
+
+.for-smartphone {
+  height: 4vw;
+}
+
+.qr-code {
+  height: 5.5vw;
+}
+
+/* メインエリア */
+.main-area {
+  flex: 2;
+  padding: 2vw;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* 診断パネル */
+.diagnostic-panel {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1.5vw;
+  padding: 2vw;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-description {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2vw;
+  margin-bottom: 0.8vw;
+}
+
+.panel-title {
+  color: white;
+  font-size: 2.5vw;
+  font-weight: bold;
+  margin-bottom: 1.5vw;
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+}
+
+.panel-title-icon {
+  font-size: 2.5vw;
+}
+
+/* ステータス項目 */
+.status-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2vw;
+}
+
+.status-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1vw;
+  padding: 1.5vw 2vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.status-label {
+  color: white;
+  font-size: 1.6vw;
+  font-weight: 500;
+}
+
+.status-value {
+  display: flex;
+  align-items: center;
+  gap: 0.8vw;
+  font-size: 1.4vw;
+  font-weight: 600;
+}
+
+.status-icon {
+  font-size: 1.8vw;
+}
+
+.status-ok {
+  color: #4ADE80;
+}
+
+.status-error {
+  color: #F87171;
+}
+
+.status-checking {
+  color: #FBBF24;
+}
+
+/* リトライ情報 */
+.retry-section {
+  margin-top: 1.5vw;
+  padding-top: 1.5vw;
+  border-top: 0.1vw solid rgba(255, 255, 255, 0.2);
+}
+
+.retry-info {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.3vw;
+  text-align: center;
+  margin-bottom: 1vw;
+}
+
+.progress-bar {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0.5vw;
+  height: 0.8vw;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: #FFD06C;
+  height: 100%;
+  width: 0%;
+  transition: width 1s linear;
+}
+
+/* 連絡先・バージョン */
+.footer-info {
+  margin-top: 1.5vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contact-info {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1vw;
+}
+
+.contact-link {
+  color: #FFD06C;
+  font-weight: 600;
+}
+
+.version-info {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1vw;
+  font-family: monospace;
+}
+
+/* アニメーション */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
