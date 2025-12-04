@@ -50,6 +50,16 @@ else
   echo "[kurupiro] git fetch に失敗しました。前回バージョンのまま続行します。" >&2
 fi
 
+# Gitコミットハッシュをoffline.htmlに埋め込み
+COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+OFFLINE_HTML="${BASE_DIR}/www/offline.html"
+if [ -f "$OFFLINE_HTML" ]; then
+  # 毎回プレースホルダーを更新（既に置換済みでも新しいハッシュに更新）
+  sed -i "s/<!--GIT_COMMIT_HASH-->/${COMMIT_HASH}/g" "$OFFLINE_HTML"
+  sed -i "s/[a-f0-9]\{7\}\(-dirty\)\?/${COMMIT_HASH}/g" "$OFFLINE_HTML" 2>/dev/null || true
+  echo "[kurupiro] コミットハッシュ: ${COMMIT_HASH}"
+fi
+
 # ------------------------------------------------------------------------------
 # 2. nginx 起動確認（失敗してもChromium起動は続行）
 # ------------------------------------------------------------------------------

@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <meta http-equiv="Content-Language" content="en">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -37,52 +39,52 @@
     <div class="diagnostic-panel">
       <p class="panel-description">現在ネットワーク接続に問題があり、サーバーにアクセスできません</p>
       <h1 class="panel-title">
-        <span class="panel-title-icon">⚠️</span>
+        <span class="panel-title-icon">!</span>
         ネットワーク診断
       </h1>
 
       <div class="status-list">
         <!-- ネットワーク状態 -->
         <div class="status-item">
-          <span class="status-label">📶 ネットワーク接続</span>
+          <span class="status-label"><span class="icon-text">[NET]</span> インターネット接続</span>
           <span class="status-value" id="status-network">
-            <span class="status-icon spinning">⟳</span>
+            <span class="status-icon spinning">...</span>
             <span class="status-checking">確認中...</span>
           </span>
         </div>
 
         <!-- DNS (1.1.1.1) -->
         <div class="status-item">
-          <span class="status-label">🌐 DNS (1.1.1.1)</span>
+          <span class="status-label"><span class="icon-text">[DNS]</span> Cloudflare (1.1.1.1)</span>
           <span class="status-value" id="status-dns-cloudflare">
-            <span class="status-icon spinning">⟳</span>
+            <span class="status-icon spinning">...</span>
             <span class="status-checking">確認中...</span>
           </span>
         </div>
 
         <!-- DNS (8.8.8.8) -->
         <div class="status-item">
-          <span class="status-label">🌐 DNS (8.8.8.8)</span>
+          <span class="status-label"><span class="icon-text">[DNS]</span> Google (8.8.8.8)</span>
           <span class="status-value" id="status-dns-google">
-            <span class="status-icon spinning">⟳</span>
+            <span class="status-icon spinning">...</span>
             <span class="status-checking">確認中...</span>
           </span>
         </div>
 
         <!-- くるぴろサーバー -->
         <div class="status-item">
-          <span class="status-label">🚌 くるぴろサーバー</span>
+          <span class="status-label"><span class="icon-text">[SRV]</span> くるぴろサーバー</span>
           <span class="status-value" id="status-server">
-            <span class="status-icon spinning">⟳</span>
+            <span class="status-icon spinning">...</span>
             <span class="status-checking">確認中...</span>
           </span>
         </div>
 
         <!-- APIサーバー -->
         <div class="status-item">
-          <span class="status-label">📡 APIサーバー</span>
+          <span class="status-label"><span class="icon-text">[API]</span> APIサーバー</span>
           <span class="status-value" id="status-api">
-            <span class="status-icon spinning">⟳</span>
+            <span class="status-icon spinning">...</span>
             <span class="status-checking">確認中...</span>
           </span>
         </div>

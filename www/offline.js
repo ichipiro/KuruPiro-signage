@@ -23,16 +23,16 @@ function setStatus(elementId, status, message) {
   let icon, className;
   switch (status) {
     case 'ok':
-      icon = '✓';
+      icon = 'OK';
       className = 'status-ok';
       break;
     case 'error':
-      icon = '✗';
+      icon = 'NG';
       className = 'status-error';
       break;
     case 'checking':
     default:
-      icon = '⟳';
+      icon = '...';
       className = 'status-checking';
       break;
   }
@@ -44,11 +44,29 @@ function setStatus(elementId, status, message) {
   `;
 }
 
-// ネットワーク状態チェック
-function checkNetwork() {
-  const online = navigator.onLine;
-  setStatus('status-network', online ? 'ok' : 'error', online ? 'オンライン' : 'オフライン');
-  return online;
+// ネットワーク状態チェック（実際の接続テストを行う）
+async function checkNetwork() {
+  setStatus('status-network', 'checking', '確認中...');
+  
+  // navigator.onLine は信頼性が低いため、実際にfetchで確認
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    
+    // Google の generate_204 エンドポイントで接続確認
+    await fetch('https://www.google.com/generate_204', {
+      mode: 'no-cors',
+      cache: 'no-store',
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    
+    setStatus('status-network', 'ok', '接続済み');
+    return true;
+  } catch (e) {
+    setStatus('status-network', 'error', '未接続');
+    return false;
+  }
 }
 
 // DNS疎通チェック (画像読み込みで代替)
@@ -128,7 +146,8 @@ async function checkApiServer() {
 
 // 全チェック実行
 async function runAllChecks() {
-  checkNetwork();
+  // ネットワーク接続チェック
+  const networkOk = await checkNetwork();
   
   // 並列でDNSチェック
   await Promise.all([
@@ -145,7 +164,8 @@ async function runAllChecks() {
   // 両サーバーに到達できたらリロードして本来のページへ
   if (serverOk && apiOk) {
     setTimeout(() => {
-      window.location.reload();
+      // キャッシュをクリアしてハードリロード
+      window.location.href = '/?nocache=' + Date.now();
     }, 2000);
   }
 }
