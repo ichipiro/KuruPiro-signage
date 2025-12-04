@@ -221,6 +221,26 @@ if [ -f /etc/nginx/sites-enabled/default ]; then
   rm -f /etc/nginx/sites-enabled/default
 fi
 
+# nginx がオフラインでも起動できるよう、network-wait サービスを無効化
+# これにより network-online.target がネットワーク接続を待たずに達成される
+echo "[5.1/9] nginx のネットワーク依存を解除..."
+systemctl disable --now NetworkManager-wait-online.service 2>/dev/null || true
+systemctl mask NetworkManager-wait-online.service 2>/dev/null || true
+systemctl disable --now systemd-networkd-wait-online.service 2>/dev/null || true
+systemctl mask systemd-networkd-wait-online.service 2>/dev/null || true
+
+# nginx のオーバーライド設定（ネットワーク依存を最小化）
+mkdir -p /etc/systemd/system/nginx.service.d
+cat > /etc/systemd/system/nginx.service.d/override.conf <<EOF
+[Unit]
+# ネットワークがオフラインでも起動可能にする
+After=
+Wants=
+Requires=
+After=local-fs.target sysinit.target
+EOF
+systemctl daemon-reload
+
 systemctl restart nginx
 
 echo "[6/9] systemd ユニット作成"

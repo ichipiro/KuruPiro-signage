@@ -84,11 +84,10 @@ if [ "$NGINX_SUCCESS" = false ]; then
     echo "[kurupiro] nginx 起動成功"
     NGINX_SUCCESS=true
   else
-    echo "[kurupiro] エラー: nginx の起動に失敗しました" >&2
-    # nginxが起動しないとChromiumでconnection refusedになるため終了
-    echo "[kurupiro] nginx なしでは表示できないため、30秒後に再試行します" >&2
-    sleep 30
-    exec "$0" "$@"
+    echo "[kurupiro] 警告: nginx の起動に失敗しました" >&2
+    echo "[kurupiro] オフラインページを直接表示します" >&2
+    # nginx なしの場合、ローカルHTMLファイルを直接表示
+    KIOSK_URL="file://${BASE_DIR}/www/offline.html"
   fi
 fi
 
