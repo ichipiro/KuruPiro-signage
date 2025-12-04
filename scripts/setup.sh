@@ -180,6 +180,19 @@ server {
         add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
     }
 
+    # オフライン画面と関連ファイル（ローカルから配信）
+    location = /offline.html {
+        internal;
+    }
+
+    location ~ ^/offline\.(css|js)$ {
+        # ローカルのwwwディレクトリから配信
+    }
+
+    location ~ ^/(logo|bus|ad-01|for-smartphone|qr)\.png$ {
+        # ローカルのwwwディレクトリから配信（オフライン画面用アセット）
+    }
+
     # 上流サイトへの proxy
     location / {
         proxy_pass ${UPSTREAM_BASE}${UPSTREAM_PATH};
@@ -194,10 +207,6 @@ server {
         add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
 
         error_page 500 502 503 504 /offline.html;
-    }
-
-    # オフライン画面
-    location = /offline.html {
     }
 }
 EOF
@@ -220,16 +229,16 @@ echo "[6/9] systemd ユニット作成"
 cat > /etc/systemd/system/kurupiro-start.service <<EOF
 [Unit]
 Description=kurupiro start (git pull + kiosk)
-After=network-online.target nginx.service
-Wants=network-online.target
-Requires=nginx.service
+After=graphical.target
+Wants=nginx.service
 
 [Service]
 ExecStart=${APP_DIR}/scripts/start.sh
 User=${PI_USER}
 Group=${PI_USER}
 Environment=DISPLAY=:0
-Restart=always
+Restart=on-failure
+RestartSec=10
 
 [Install]
 WantedBy=graphical.target

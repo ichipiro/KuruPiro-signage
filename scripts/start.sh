@@ -55,41 +55,40 @@ fi
 # ------------------------------------------------------------------------------
 echo "[2/3] nginx 起動確認..."
 
-# ネットワーク/DNS準備を待つ（起動直後はDNS解決が失敗することがある）
-MAX_NETWORK_WAIT=30
-NETWORK_WAITED=0
-while ! ping -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; do
-  if [ $NETWORK_WAITED -ge $MAX_NETWORK_WAIT ]; then
-    echo "[kurupiro] 警告: ネットワーク接続を確認できません（${MAX_NETWORK_WAIT}秒待機）" >&2
+# nginx起動を待つ（ネットワーク不要、ローカルサーバーなので）
+NGINX_MAX_RETRY=10
+NGINX_RETRY=0
+NGINX_SUCCESS=false
+
+while [ $NGINX_RETRY -lt $NGINX_MAX_RETRY ]; do
+  NGINX_RETRY=$((NGINX_RETRY + 1))
+  
+  if systemctl is-active --quiet nginx; then
+    echo "[kurupiro] nginx は起動しています"
+    NGINX_SUCCESS=true
     break
   fi
-  echo "[kurupiro] ネットワーク接続を待機中... (${NETWORK_WAITED}/${MAX_NETWORK_WAIT}秒)"
-  sleep 1
-  NETWORK_WAITED=$((NETWORK_WAITED + 1))
+  
+  echo "[kurupiro] nginx 起動試行 (${NGINX_RETRY}/${NGINX_MAX_RETRY})..."
+  sudo systemctl start nginx 2>/dev/null || true
+  sleep 2
 done
 
-if systemctl is-active --quiet nginx; then
-  echo "[kurupiro] nginx は既に起動しています"
-else
-  echo "[kurupiro] nginx を起動します..."
-  # 最大3回リトライ（DNS解決待ち）
-  NGINX_MAX_RETRY=3
-  NGINX_RETRY=0
-  NGINX_SUCCESS=false
-  while [ $NGINX_RETRY -lt $NGINX_MAX_RETRY ]; do
-    NGINX_RETRY=$((NGINX_RETRY + 1))
-    echo "[kurupiro] nginx 起動試行 (${NGINX_RETRY}/${NGINX_MAX_RETRY})..."
-    if sudo systemctl start nginx; then
-      echo "[kurupiro] nginx 起動成功"
-      NGINX_SUCCESS=true
-      break
-    else
-      echo "[kurupiro] nginx 起動失敗、5秒後にリトライ..." >&2
-      sleep 5
-    fi
-  done
-  if [ "$NGINX_SUCCESS" = false ]; then
-    echo "[kurupiro] 警告: nginx の起動に${NGINX_MAX_RETRY}回失敗しましたが、Chromium起動を続行します" >&2
+# nginxがまだ起動していなければ強制的に起動を試みる
+if [ "$NGINX_SUCCESS" = false ]; then
+  echo "[kurupiro] nginx が起動していません。再度起動を試みます..."
+  sudo systemctl restart nginx || true
+  sleep 3
+  
+  if systemctl is-active --quiet nginx; then
+    echo "[kurupiro] nginx 起動成功"
+    NGINX_SUCCESS=true
+  else
+    echo "[kurupiro] エラー: nginx の起動に失敗しました" >&2
+    # nginxが起動しないとChromiumでconnection refusedになるため終了
+    echo "[kurupiro] nginx なしでは表示できないため、30秒後に再試行します" >&2
+    sleep 30
+    exec "$0" "$@"
   fi
 fi
 
