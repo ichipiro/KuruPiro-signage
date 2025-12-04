@@ -167,17 +167,29 @@ server {
     root ${APP_DIR}/www;
     index offline.html;
 
+    # DNS解決（オフライン時でも nginx が起動できるよう resolver を設定）
+    resolver 8.8.8.8 1.1.1.1 valid=30s ipv6=off;
+    resolver_timeout 5s;
+
+    # 変数を使うことで、起動時の DNS 解決エラーを回避
+    set \$upstream_host ${UPSTREAM_HOST};
+    set \$upstream_base ${UPSTREAM_BASE};
+    set \$upstream_path ${UPSTREAM_PATH};
+
     # アセットへのプロキシ（上流のルート直下）
     location /assets/ {
-        proxy_pass ${UPSTREAM_BASE}/assets/;
+        proxy_pass \$upstream_base/assets/;
         proxy_read_timeout 5s;
         proxy_connect_timeout 3s;
         proxy_ssl_verify off;
         proxy_ssl_server_name on;
-        proxy_set_header Host ${UPSTREAM_HOST};
+        proxy_set_header Host \$upstream_host;
 
         add_header Access-Control-Allow-Origin "*" always;
         add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+
+        # DNS解決失敗時はオフラインページへ
+        error_page 502 503 504 /offline.html;
     }
 
     # オフライン画面と関連ファイル（ローカルから配信）
@@ -195,12 +207,12 @@ server {
 
     # 上流サイトへの proxy
     location / {
-        proxy_pass ${UPSTREAM_BASE}${UPSTREAM_PATH};
+        proxy_pass \$upstream_base\$upstream_path;
         proxy_read_timeout 5s;
         proxy_connect_timeout 3s;
         proxy_ssl_verify off;
         proxy_ssl_server_name on;
-        proxy_set_header Host ${UPSTREAM_HOST};
+        proxy_set_header Host \$upstream_host;
 
         # CORSヘッダー（crossorigin属性のあるスクリプト/CSS用）
         add_header Access-Control-Allow-Origin "*" always;
