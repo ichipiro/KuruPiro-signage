@@ -178,7 +178,7 @@ server {
 
     # アセットへのプロキシ（上流のルート直下）
     location /assets/ {
-        proxy_pass \$upstream_base/assets/;
+        proxy_pass \$upstream_base\$request_uri;
         proxy_read_timeout 5s;
         proxy_connect_timeout 3s;
         proxy_ssl_verify off;
@@ -194,7 +194,7 @@ server {
 
     # オフライン画面と関連ファイル（ローカルから配信）
     location = /offline.html {
-        internal;
+        # internal を削除 - error_page からのリダイレクト後も表示可能にする
     }
 
     location ~ ^/offline\.(css|js)$ {
@@ -213,6 +213,9 @@ server {
         proxy_ssl_verify off;
         proxy_ssl_server_name on;
         proxy_set_header Host \$upstream_host;
+        
+        # エラーページをローカルで処理
+        proxy_intercept_errors on;
 
         # CORSヘッダー（crossorigin属性のあるスクリプト/CSS用）
         add_header Access-Control-Allow-Origin "*" always;
