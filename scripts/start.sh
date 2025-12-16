@@ -140,6 +140,12 @@ xsetroot -solid black 2>/dev/null || true
 
 echo "[kurupiro] URL: ${KIOSK_URL}"
 
+# キャッシュウォームアップをバックグラウンドで開始
+# （ネットワーク不安定環境対策: 起動後に数回リロードしてキャッシュを蓄積）
+"${SCRIPT_DIR}/warmup-reload.sh" &
+WARMUP_PID=$!
+echo "[kurupiro] キャッシュウォームアップ開始 (PID: ${WARMUP_PID})"
+
 chromium \
   --kiosk "${KIOSK_URL}" \
   --incognito \
