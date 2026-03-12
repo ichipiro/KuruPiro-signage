@@ -1,5 +1,7 @@
 # くるぴろサイネージ（Raspberry Pi デジタルサイネージ）
 
+# キャリアセンター版
+
 Raspberry Pi 4B（8GB）を使って、バス時刻表などの Web コンテンツをサイネージ表示するための構成です。  
 HDMI でディスプレイに出力し、指定した時間で自動起動・自動シャットダウンします。
 
@@ -13,22 +15,31 @@ HDMI でディスプレイに出力し、指定した時間で自動起動・自
 - **Raspberry Pi OS (64bit / Desktop)**
 - **Chromium キオスクモード**
 - **nginx（ローカル Web サーバ）**
-    - 上流の本番サイトに proxy
-    - 接続失敗時は `offline.html` を返す（エラー画面を出さない）
+  - 上流の本番サイトに proxy
+  - 接続失敗時は `offline.html` を返す（エラー画面を出さない）
 - **GitHub からの起動時 `git pull` 更新**
 - **毎日指定時刻に自動シャットダウン**（`.env` で設定可能）
 - **USB キーボード・マウス禁止（usbhid 無効化）**
+- **アプリ切り替えタイマー**（30秒ごとにアプリケーションを切り替える）
+- **キャリアルーム用アプリケーション**（定期的にダウンロードして起動）
 
 ---
 
 ## 🗂 ディレクトリ構成
+
 ```
 /opt/kurupiro
 ├─ scripts/
+│   ├─ app-switcher.sh # アプリ切り替えタイマー
 │   ├─ setup.sh      # 初回セットアップ
 │   ├─ start.sh      # 起動時の git pull + Chromium キオスク起動
 │   ├─ reload.sh     # 軽いリロード（xdotool F5）
 │   └─ common.sh     # 共通設定読み込み
+├─ apps/
+│  └─ ebitv/
+│       ├─ ebitv # キャリアルーム用アプリケーション
+│       ├─ config.ini # アプリケーションの設定ファイル
+│       └─ data/  # アプリケーションのデータ保存先
 ├─ www/
 │   └─ offline.html  # オフライン時に表示する画面
 ├─ .env.sample       # URL などの設定サンプル
@@ -41,32 +52,39 @@ HDMI でディスプレイに出力し、指定した時間で自動起動・自
 ## 🔧 セットアップ手順
 
 ### 1️⃣ Raspberry Pi OS の準備
+
 - Raspberry Pi OS（64bit / Desktop）をインストール
 - 初期セットアップを完了
 
 ### 2️⃣ タイムゾーンを日本に設定
+
 ```bash
 sudo raspi-config
 ```
+
 - `5 Localisation Options` → `L2 Timezone` → `Asia` → `Tokyo` を選択
 
-### 3️⃣ リポジトリのクローン
+### 3️⃣ リポジトリのクローン(careerブランチ)
+
 ```bash
 sudo mkdir -p /opt/kurupiro
 sudo chown $USER:$USER /opt/kurupiro
-git clone https://github.com/ichipiro/KuruPiro-signage.git /opt/kurupiro
+git clone -b career https://github.com/ichipiro/KuruPiro-signage.git /opt/kurupiro
 cd /opt/kurupiro
 ```
 
 ### 4️⃣ セットアップスクリプトの実行
+
 ```bash
 sudo bash ./scripts/setup.sh
 ```
 
 ### 5️⃣ .env の編集
+
 ```bash
 nano .env
 ```
+
 表示するURLやシャットダウン時刻を設定してください。
 
 ```bash
@@ -81,6 +99,7 @@ KURUPIRO_SHUTDOWN_TIME="21:57"
 ```
 
 ### 6️⃣ 再起動
+
 ```bash
 sudo reboot
 ```
@@ -90,6 +109,7 @@ sudo reboot
 ## 📝 補足
 
 - **起動時**: `start.sh` が自動実行され、`git pull` → Chromium キオスク起動
+- **30秒ごと**: `app-switcher.sh` でアプリケーション切り替え
 - **2時間ごと**: `reload.sh` で F5 リロード
 - **シャットダウン**: `.env` で設定した時刻に自動シャットダウン
 - **USB HID 無効化**: 再起動後に有効

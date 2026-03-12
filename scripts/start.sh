@@ -6,6 +6,8 @@ set -euo pipefail
 # ==============================================================================
 # このスクリプトは Raspberry Pi の起動時に毎回実行され、以下を行います:
 #   1. git pull で最新のコードを取得
+#   1.1. キャリアルーム用アプリケーションのダウンロード
+#   1.2. キャリアルーム用アプリケーションの起動
 #   2. nginx の起動確認
 #   3. Chromium キオスクモードの起動
 # ==============================================================================
@@ -58,6 +60,27 @@ if [ -f "$OFFLINE_HTML" ]; then
   sed -i "s/<!--GIT_COMMIT_HASH-->/${COMMIT_HASH}/g" "$OFFLINE_HTML"
   sed -i "s/[a-f0-9]\{7\}\(-dirty\)\?/${COMMIT_HASH}/g" "$OFFLINE_HTML" 2>/dev/null || true
   echo "[kurupiro] コミットハッシュ: ${COMMIT_HASH}"
+fi
+
+# --------------------------------------------------------------------------------
+# 1.1. キャリアルーム用アプリケーションのダウンロード
+# ------------------------------------------------------------------------------
+echo "[1.1/3] ebitvのダウンロード..."
+APP_URL="https://github.com/ajinori-256/ebitv/releases/latest/download/ebitv-linux-arm64"
+mkdir -p "${BASE_DIR}/apps/ebitv"
+wget -q -O "${BASE_DIR}/apps/ebitv/ebitv" "${APP_URL}" || { echo "[ebitv] ebitvのダウンロードに失敗しました" >&2; }
+chmod +x "${BASE_DIR}/apps/ebitv/ebitv"
+echo "[ebitv] ebitvをダウンロードしました"
+
+# ------------------------------------------------------------------------------
+# 1.2. キャリアルーム用アプリケーションの起動
+# ------------------------------------------------------------------------------
+echo "[1.2/3] ebitvの起動..."
+if [ -f "${BASE_DIR}/apps/ebitv/ebitv" ]; then
+  "${BASE_DIR}/apps/ebitv/ebitv --no-splash" &
+  echo "[ebitv] ebitvを起動しました"
+else
+  echo "[ebitv] 警告: ebitvの実行ファイルが見つかりません" >&2
 fi
 
 # ------------------------------------------------------------------------------

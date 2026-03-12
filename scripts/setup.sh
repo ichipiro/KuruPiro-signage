@@ -304,6 +304,32 @@ Unit=kurupiro-reload.service
 WantedBy=timers.target
 EOF
 
+# app-switcher.timer（30秒ごとにアプリ切り替え）
+cat > /etc/systemd/system/app-switcher.timer <<EOF
+[Unit]
+Description=App Switcher Timer
+
+[Timer]
+OnBootSec=30
+OnUnitActiveSec=30
+Unit=app-switcher.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+# app-switcher.service（アプリ切り替え）
+cat > /etc/systemd/system/app-switcher.service <<EOF
+[Unit]
+Description=App Switcher Service
+
+[Service]
+Type=oneshot
+ExecStart=${APP_DIR}/scripts/app-switcher.sh
+User=${PI_USER}
+Group=${PI_USER}
+EOF
+
 echo "[7/9] 自動シャットダウン設定 (${SHUTDOWN_TIME})"
 
 cat > /etc/cron.d/kurupiro-shutdown <<EOF
@@ -373,6 +399,7 @@ echo "[11/12] systemd 有効化"
 systemctl daemon-reload
 systemctl enable kurupiro-start.service
 systemctl enable kurupiro-reload.timer
+systemctl enable app-switcher.timer
 
 touch "${INSTALL_FLAG}"
 chown "${PI_USER}:${PI_USER}" "${INSTALL_FLAG}"
